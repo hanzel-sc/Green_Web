@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Tech Carbon Intensity Map</title>
+  
+  <!-- Link to Leaflet.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    #map {
+      width: 100%;
+      height: 600px;
+    }
+    #zones {
+      margin-top: 20px;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+    }
+    #zones ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    #zones li {
+      padding: 5px;
+      margin: 5px 0;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+    }
+    /* Dark Mode Styles */
+    .dark-mode {
+      background-color: #121212;
+      color: gray;
+    }
+    .dark-mode #map 
+    {
+      background-color: #333;
+    }
+    .dark-mode #zones 
+    {
+      background-color: black;
+    }
+    #darkModeToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000; /* Ensure the button stays above other elements */
+}
+
+    #darkModeToggle:hover
+    {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dark Mode Toggle Button -->
+  <button id="darkModeToggle">Toggle Dark Mode</button>
+
+  <!-- Map Div -->
+  <div id="map"></div>
+
+  <!-- Zones List -->
+  <div id="zones">
+    <h3>Carbon Intensity in Different Zones</h3>
+    <ul id="zoneList">
+      <!-- Zones will be added here dynamically -->
+    </ul>
+  </div>
+
+  <script>
+    // Initialize the Leaflet map with coordinates for Bengaluru as default
+    const map = L.map('map').setView([12.9716, 77.5946], 10);  // Coordinates for Bengaluru
+
+    // Add OpenStreetMap base layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Your API URL for carbon intensity data
+    const apiUrl = 'https://api.electricitymap.org/v3/carbon-intensity/latest?zone=IN';  // Replace 'IN' with the desired zone (India)
+    const apiKey = 'weUKK9Eu3Semk';  // Replace with your actual API key
+
+    // Marker for Bengaluru (initial location)
+    let marker = L.marker([12.9716, 77.5946]).addTo(map);  // Bengaluru coordinates
+
+    // Fetch data from the ElectricityMap API
+    function fetchData(zone) {
+      const url = `https://api.electricitymap.org/v3/carbon-intensity/latest?zone=${zone || 'IN'}`;
+      
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'auth-token': apiKey
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+
+        if (data && data.carbonIntensity) {
+          const carbonIntensity = data.carbonIntensity;
+          const region = data.zone || 'Unknown Region';
+          const datetime = new Date(data.datetime).toLocaleString();
+
+          // Update the marker with new data
+          marker.setLatLng([12.9716, 77.5946]);
+
+          marker.bindPopup(`
+            <b>Region:</b> ${region}<br>
+            <b>Carbon Intensity:</b> ${carbonIntensity} gCO2/kWh<br>
+            <b>Last Updated:</b> ${datetime}
+          `).openPopup();
+
+          // Update the zones list
+          const zoneList = document.getElementById('zoneList');
+          let zoneItem = document.createElement('li');
+          zoneItem.innerHTML = `${region}: ${carbonIntensity} gCO2/kWh`;
+          zoneList.appendChild(zoneItem);
+        } else {
+          console.error('No data found or incorrect response structure');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+    }
+
+    // Initial fetch for India zone
+    fetchData('IN');
+
+    // Fetch data for a few other zones
+    const otherZones = ['US', 'FR', 'DE', 'IN'];
+    otherZones.forEach(zone => fetchData(zone));
+
+    // Toggle Dark Mode
+    const darkModeButton = document.getElementById('darkModeToggle');
+    darkModeButton.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+    });
+
+    // Additional markers for other zones
+    const zoneMarkers = [
+      { lat: 12.9716, lng: 77.5946, zone: 'IN', country: 'India' },
+      { lat: 48.8566, lng: 2.3522, zone: 'FR', country: 'France' },
+      { lat: 51.5074, lng: -0.1278, zone: 'GB', country: 'United Kingdom' },
+      { lat: 40.7128, lng: -74.0060, zone: 'US', country: 'United States' }
+    ];
+
+    zoneMarkers.forEach(zone => {
+      L.marker([zone.lat, zone.lng])
+        .addTo(map)
+        .bindPopup(`<b>${zone.country}</b><br>Click to zoom`)
+        .on('click', function () {
+          map.setView([zone.lat, zone.lng], 10); // Zoom in on the clicked zone
+        });
+    });
+  </script>
+
+</body>
+</html>
