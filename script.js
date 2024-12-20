@@ -28,7 +28,7 @@ document.getElementById('dark-mode-toggle').addEventListener('click', () => {
     });
 });
 function calculateFootprint() {
-    // Getting the input values
+    // Getting ze input values
     const electricity = parseFloat(document.getElementById('electricity').value);
     const car = parseFloat(document.getElementById('car').value);
     const flights = parseFloat(document.getElementById('flights').value);
@@ -38,7 +38,7 @@ function calculateFootprint() {
     // Validate inputs
     if (isNaN(electricity) || isNaN(car) || isNaN(flights) || isNaN(water) || isNaN(heating)) {
         alert("Please enter valid numbers for all fields.");
-        return; // Prevent further calculation if inputs are invalid
+        return; 
     }
 
     // Carbon footprint emission factors (in kg CO2e)
@@ -48,27 +48,18 @@ function calculateFootprint() {
     const waterEmissionFactor = 0.002; // kg CO2 per liter of water
     const heatingEmissionFactor = 2.9; // kg CO2 per liter of gas
 
-    // Calculate emissions
+    // Calculating zee emissions
     const monthlyElectricityEmission = electricity * electricityEmissionFactor * 30;
     const monthlyCarEmission = car * carEmissionFactor * 30;
     const annualFlightEmission = flights * 1500 * flightEmissionFactor; // assuming 1500 km per flight
     const monthlyWaterEmission = water * waterEmissionFactor * 30;
     const monthlyHeatingEmission = heating * heatingEmissionFactor;
 
-    // Calculate total monthly and annual emissions
+    // Calculate ze total monthly and annual emissions
     const totalMonthlyEmission = monthlyElectricityEmission + monthlyCarEmission + monthlyWaterEmission + monthlyHeatingEmission;
     const totalAnnualEmission = totalMonthlyEmission * 12 + annualFlightEmission;
 
-    // Debug output
-    console.log('Electricity Emission:', monthlyElectricityEmission);
-    console.log('Car Emission:', monthlyCarEmission);
-    console.log('Flight Emission:', annualFlightEmission);
-    console.log('Water Emission:', monthlyWaterEmission);
-    console.log('Heating Emission:', monthlyHeatingEmission);
-    console.log('Total Monthly Emission:', totalMonthlyEmission);
-    console.log('Total Annual Emission:', totalAnnualEmission);
-
-    // Display results
+    // Display ze results
     document.getElementById('monthly-emit').innerHTML = `Total Monthly Carbon Emission: ${totalMonthlyEmission.toFixed(2)} kg CO2`;
     document.getElementById('annual-emit').innerHTML = `Total Annual Carbon Emission: ${totalAnnualEmission.toFixed(2)} kg CO2`;
 }
